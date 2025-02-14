@@ -1,0 +1,32 @@
+---
+title: "Module 6"
+author: "Chris Reddish"
+date: "2025-02-14"
+output: html_document
+---
+# Question 1: Matrix Addition and Subtraction
+```{r}
+A <- matrix(c(2, 0, 1, 3), ncol=2)
+B <- matrix(c(5, 2, 4, -1), ncol=2)
+```
+a. Find A + B
+```{r}
+A + B
+```
+b. Find A - B
+```{r}
+A - B
+```
+# Question 2: Creating a Diagonal Matrix
+Using the diag() function to create a 4x4 matrix with specified diagonal values:
+```{r}
+d_matrix <- diag(c(4, 1, 2, 3))
+d_matrix
+```
+# Question 3: Generating a Specific Matrix
+Using diag() and matrix operations to construct the given matrix:
+```{r}
+M <- diag(3, 5)
+M[,1] <- c(3,2,2,2,2)
+M
+```
