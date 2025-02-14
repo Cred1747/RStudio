@@ -1,0 +1,48 @@
+---
+title: "Understanding Matrices and their Inverses in R"
+author: "Chris Reddish"
+date: "2025-02-10"
+output: html_document
+---
+## Introduction
+In this blog post, I will compute the determinant and inverse of matrices using R. The matrices given for this assignment are: Matrix A (10×10 square matrix) Matrix B (10×100 rectangular matrix):
+```{r}
+A <- matrix(1:100, nrow=10)  
+B <- matrix(1:1000, nrow=10)
+```
+# Step 1: Checking Matrix Dimensions
+For a matrix to be invertible, it must be square, meaning the number of rows must equal the number of columns. Let’s check the dimensions:
+
+```{r}
+print(paste("Dimensions of A:", paste(dim(A), collapse="x")))
+print(paste("Dimensions of B:", paste(dim(B), collapse="x")))
+```
+Since B is not square, it cannot be inverted.
+#Step 2: Compute the Determinant of A
+The determinant helps determine if a matrix is invertible. A determinant of zero means the matrix is singular (not invertible).
+
+```{r}
+det_A <- det(A)
+print(paste("Determinant of A:", det_A))
+```
+Step 3: Attempt to Compute Inverse
+Now, I will attempt to compute the inverse using solve(A). If det(A) == 0, this will fail.
+```{r}
+if (det_A != 0) {
+  inv_A <- solve(A)
+  print("Inverse of A:")
+  print(inv_A)
+} else {
+  print("Matrix A is singular and cannot be inverted.")
+}
+```
+# Step 4: Verify Why B Cannot Be Inverted
+```{r}
+C <- matrix(sample(1:100, 100), nrow=10)
+
+# Compute inverse of C
+inv_C <- solve(C)
+print("Inverse of C:")
+print(inv_C)
+```
+Matrix C is square and has a nonzero determinant, making it invertible.
