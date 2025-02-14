@@ -1,0 +1,213 @@
+---
+title: 'Module # 4 Programming structure in R'
+author: "Chris Reddish"
+date: "2025-02-03"
+output: html_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+Understanding Patient Data and Assessments
+This analysis examines patient data collected from a local hospital, focusing on blood pressure (BP), frequency of visits, and medical assessments to determine patterns in emergency care decisions. The dataset includes BP measurements, initial and secondary doctor assessments, and the final hospital decision regarding patient urgency. The goal of this study is to identify how different factors influence whether a patient is classified as requiring high or low urgency care.
+
+By using boxplots, bar charts, and a correlation heatmap, this analysis provides insights into:<br>
+-How blood pressure affects assessments and final decisions.<br>
+-Whether first and second doctor assessments align with emergency classifications.<br>
+-If hospital visit frequency influences urgent care decisions.<br>
+
+
+```{r}
+# Load necessary library
+library(ggplot2)  # For making graphs
+
+# Create the dataset
+Freq <- c(0.6, 0.3, 0.4, 0.4, 0.2, 0.6, 0.3, 0.4, 0.9, 0.2)
+bloodp <- c(103, 87, 32, 42, 59, 109, 78, 205, 135, 176)
+first <- c(1, 1, 1, 1, 0, 0, 0, 0, NA, 1)  # 1 = Bad, 0 = Good, NA = Missing
+second <- c(0, 0, 1, 1, 0, 0, 1, 1, 1, 1)  # 0 = Low, 1 = High
+finaldecision <- c(0, 1, 0, 1, 0, 1, 0, 1, 1, 1)  # 0 = Low, 1 = High
+
+# Store data in a table
+patient_data <- data.frame(Freq, bloodp, first, second, finaldecision)
+
+# Show the data
+print(patient_data)
+
+```
+Boxplots: Blood Pressure vs. First and Second Assessments<br>
+
+Graph 1: Blood Pressure by First Assessment<br>
+What it shows:<br>
+-This boxplot compares blood pressure (BP) levels between patients marked as Good (0) or Bad (1) by the First Doctor’s Assessment.<br>
+-If patients with higher BP are consistently labeled "Bad," it suggests that BP plays a role in the first doctor's judgment.<br>
+Expected trend: Higher BP should correspond to more Bad (1) assessments.<br>
+
+Graph 2: Blood Pressure by Second Assessment<br>
+What it shows:<br>
+-This boxplot examines whether the Second Doctor's Assessment (Low = 0, High = 1) follows the same BP pattern as the first assessment.<br>
+-A strong separation between "Low" and "High" BP levels would indicate that second doctors also rely on BP for their decisions.<br>
+Expected trend: If the second assessment is more balanced, it suggests that external doctors consider other factors beyond BP<br>
+```{r, fig.width=9, fig.height=4}
+# Set up layout for two boxplots
+par(mfrow = c(1, 2))  
+
+# Boxplot for First Assessment vs. Blood Pressure
+boxplot(bloodp ~ first, 
+        main = "Graph 1: BP by First Assessment", 
+        xlab = "First Assessment (0=Good, 1=Bad)", 
+        ylab = "Blood Pressure", 
+        col = c("lightgreen", "lightcoral"), 
+        names = c("Good", "Bad"))
+
+# Boxplot for Second Assessment vs. Blood Pressure
+boxplot(bloodp ~ second, 
+        main = "Graph 2: BP by Second Assessment", 
+        xlab = "Second Assessment (0=Low, 1=High)", 
+        ylab = "Blood Pressure", 
+        col = c("lightblue", "orange"), 
+        names = c("Low", "High"))
+
+# Reset layout
+par(mfrow = c(1, 1))
+```
+Bar Charts: First and Second Assessment Counts<br>
+
+Graph 3: First Assessment Counts<br>
+What it shows:<br>
+-This bar chart displays the total number of patients assessed as Good, Bad, or NA (missing values) by the First Doctor.<br>
+-If the Bad (1) category is significantly larger, it suggests that first doctors are stricter in their evaluations.<br>
+
+Graph 4: Second Assessment Counts<br>
+What it shows:<br>
+-This bar chart shows how patients were categorized by the Second Doctor’s Assessment (Low = 0, High = 1).<br>
+-If this chart looks more evenly distributed, it may indicate that the second assessment is more balanced compared to the first assessment.<br>
+```{r, fig.width=9, fig.height=4}
+# Set up layout for two bar charts
+par(mfrow = c(1, 2))
+
+# Convert first assessment to categories
+first_factor <- factor(first, levels = c(0, 1, NA), labels = c("Good", "Bad", "Missing"), exclude = NULL)
+
+# Convert second assessment to categories
+second_factor <- factor(second, levels = c(0, 1), labels = c("Low", "High"))
+
+# Barplot for First Assessment
+barplot(table(first_factor, useNA = "ifany"), 
+        main = "Graph 3: First Assessment Count", 
+        xlab = "First Assessment", 
+        ylab = "Frequency",
+        col = c("lightgreen", "lightcoral", "gray"),
+        names.arg = c("Good", "Bad", "NA"))
+
+# Barplot for Second Assessment
+barplot(table(second_factor), 
+        main = "Graph 4: Second Assessment Count", 
+        xlab = "Second Assessment", 
+        ylab = "Frequency",
+        col = c("lightblue", "orange"),
+        names.arg = c("Low", "High"))
+
+# Reset layout
+par(mfrow = c(1, 1))
+```
+Boxplots: Blood Pressure vs. Final Decision<br>
+
+Graph 5: Blood Pressure by Final Decision<br>
+What it shows:<br>
+-This boxplot reveals how BP influences the hospital’s final decision (Low Urgency = 0, High Urgency = 1).<br>
+-If High Urgency (1) patients have significantly higher BP, it confirms that blood pressure is a major factor in emergency care decisions.<br>
+Expected trend: Higher BP should increase the likelihood of being classified as High Urgency (1).<br>
+
+Graph 6: Final Decision Counts<br>
+What it shows:<br>
+-This bar chart simply counts how many patients were categorized as Low Urgency (0) vs. High Urgency (1).<br>
+-If High Urgency (1) is much larger, it suggests that the hospital is frequently classifying patients as urgent.<br>
+-If both are nearly equal, it may indicate that other factors besides BP play a role in the final decision.<br>
+```{r}
+boxplot(bloodp ~ finaldecision, 
+        main = "Graph 5: BP by Final Decision", 
+        xlab = "Final Decision (0=Low, 1=High)", 
+        ylab = "Blood Pressure", 
+        col = c("lightblue", "orange"),
+        names = c("Low", "High"))
+barplot(table(finaldecision), 
+        main = " Graph 6: Final Decision Counts", 
+        xlab = "Final Decision (0=Low, 1=High)", 
+        ylab = "Frequency",
+        col = c("lightblue", "orange"),
+        names.arg = c("Low", "High"))
+```
+
+The heatmap(Graph 7) confirms that Blood Pressure is the primary factor driving urgent care decisions.<br>
+The First and Second Doctor’s Assessments have little influence, suggesting the hospital may override them based on BP and other internal criteria.<br>
+```{r}
+library(ggplot2)
+library(corrplot)
+
+# Convert categorical variables to numeric
+patient_data_numeric <- patient_data
+
+# Ensure all categorical variables are converted
+patient_data_numeric$first <- as.numeric(as.character(patient_data$first))
+patient_data_numeric$second <- as.numeric(as.character(patient_data$second))
+patient_data_numeric$finaldecision <- as.numeric(as.character(patient_data$finaldecision))
+
+# Select only numeric variables for correlation analysis
+numeric_vars <- sapply(patient_data_numeric, is.numeric)  # Identify numeric columns
+cor_matrix <- cor(patient_data_numeric[, numeric_vars], use = "complete.obs")  # Compute correlation matrix
+
+corrplot(cor_matrix, method = "color", 
+         col = colorRampPalette(c("blue", "white", "red"))(100), 
+         tl.cex = 1, number.cex = 0.8, addCoef.col = "black",
+         title = "Graph 7: Correlation Heatmap - BP, Assessments & Final Decision",
+         mar = c(2, 2, 2, 2))  # Adjust margins to fit the title
+
+
+```
+
+Side-by-Side Boxplots: First Assessment, Second Assessment, and Final Decision<br>
+All Three Assessments Together<br>
+
+What it shows:<br>
+These three side-by-side boxplots allow direct comparison of how Blood Pressure relates to each assessment stage.<br>
+First Assessment: Do doctors initially classify high BP patients as "Bad"?<br>
+Second Assessment: Does the second opinion confirm or contradict the first doctor?<br>
+Final Decision: Is BP directly responsible for an emergency classification?<br>
+
+Key takeaway: If BP trends increase from First Assessment → Second Assessment → Final Decision, then BP is the strongest predictor of emergency care.<br>
+
+```{r}
+# Set up a 1-row, 3-column layout for side-by-side boxplots
+par(mfrow = c(1, 3))
+
+# Boxplot 8: Blood Pressure by 1st Assessment
+boxplot(patient_data$bloodp ~ patient_data$first, 
+        main = " Graph 8: BP by 1st Assessment", 
+        xlab = "First Assessment (0=Good, 1=Bad)", 
+        ylab = "Blood Pressure", 
+        col = c("lightgreen", "red"),
+        names = c("Good", "Bad"))
+
+# Boxplot 9: BP by 2nd Assessment
+boxplot(patient_data$bloodp ~ patient_data$second, 
+        main = "Graph 9: BP by 2nd Assessment", 
+        xlab = "Second Assessment (0=Low, 1=High)", 
+        ylab = "Blood Pressure", 
+        col = c("lightblue", "orange"),
+        names = c("Low", "High"))
+
+# Boxplot 10: BP by Final Decision
+boxplot(patient_data$bloodp ~ patient_data$finaldecision, 
+        main = "Graph 10: BP by Final Decision", 
+        xlab = "Final Decision (0=Low, 1=High)", 
+        ylab = "Blood Pressure", 
+        col = c("lightblue", "orange"),
+        names = c("Low", "High"))
+
+```
+Conclusion: Key Findings and Insights
+The analysis reveals that blood pressure is the most significant factor in determining emergency care decisions. Patients with higher BP levels are more likely to be classified as requiring high urgency care, which aligns with expectations in emergency medicine.
+
+However, first and second doctor assessments show weak correlations with the final decision, suggesting that hospital protocols may prioritize BP and other internal criteria over subjective doctor evaluations. Additionally, hospital visit frequency has no impact on urgency classification, meaning patients who frequently visit the hospital are not treated differently in terms of emergency care.
+
+Overall, these findings suggest that BP measurements play a central role in hospital decision-making, while doctor assessments may serve as supporting but not primary factors in determining emergency status. Future analysis could investigate additional variables such as patient history, symptoms, or response to initial treatment to gain a deeper understanding of hospital decision-making processes.

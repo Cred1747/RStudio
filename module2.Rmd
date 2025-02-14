@@ -1,0 +1,42 @@
+---
+title: "Module #2 Introduction to basic R functions and Data Structures - assignment "
+author: "Christopher Reddish"
+date: "2025-01-20"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+ Your assignment, evaluate the following function call myMean. The data for this function called assignment. 
+
+> assignment2 <- c(16, 18, 14, 22, 27, 17, 19, 17, 17, 22, 20, 22)
+>myMean <- function(assignment2) { return(sum(assignment2)/length(assignment2)) }
+> YOUR turn...
+
+```{r}
+assignment2 <- c(16, 18, 14, 22, 27, 17, 19, 17, 17, 22, 20, 22)
+myMean <- function(assignment2) { return(sum(assignment2)/length(assignment2)) }
+myMean(assignment2)
+```
+The myMean function calculates the mean of the input vector by summing all elements of the vector (sum(assignment2)) and dividing it by the length of the vector (length(assignment2)).
+The function produces the correct mean of 19.25
+
+To add more flexibilty we can make the the function data as x. This will now work with any assignment. 
+
+
+```{r}
+assignment2 <- c(16, 18, 14, 22, 27, 17, 19, 17, 17, 22, 20, 22)
+assignment3 <- c(15, 18, 24, 21, 24, 13, 18, 21, 11, 21, 26, 29)
+assignment4 <- c(18, 33, 25, 23, 11, 24, 29, 30, 11, 11, 10, 17,14)
+
+#this works with any assignment
+MyMean <- function(x) {return(sum(x) / length(x))}
+
+MyMean(assignment2)
+MyMean(assignment3)
+MyMean(assignment4)
+
+```
+
+

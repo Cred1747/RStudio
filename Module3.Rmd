@@ -1,0 +1,47 @@
+---
+title: "Module 3 Election Result Dataframe"
+author: "Chris Reddish"
+date: "2025-01-30"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Define candidate names and poll results
+```{r}
+# Load necessary library
+library(ggplot2)
+
+# Define candidate names
+Name <- c("Jeb", "Donald", "Ted", "Marco", "Carly", "Hillary", "Bernie")
+
+# Define poll results
+ABC_poll <- c(4, 62, 51, 21, 2, 14, 15)
+CBS_poll <- c(12, 75, 43, 19, 1, 21, 19)
+
+# Create a data frame in long format for proper ggplot visualization
+poll_data <- data.frame(
+  Name = rep(Name, 2),
+  Poll = c(ABC_poll, CBS_poll),
+  Source = rep(c("ABC", "CBS"), each = length(Name))
+)
+```
+
+Election Poll Visualization
+
+```{r}
+# Create the bar chart with dodged position
+print(ggplot(poll_data, aes(x = Name, y = Poll, fill = Source)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.8)) +
+  labs(
+    title = "2016 Presidential Election Polls (data does not reflect actual election results)",
+    x = "Candidate", 
+    y = "Poll Results (%)"
+  ) +
+  scale_fill_manual(values = c("ABC" = "blue", "CBS" = "red"), name = "Poll Source") 
+)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
