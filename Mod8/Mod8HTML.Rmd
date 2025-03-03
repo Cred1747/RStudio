@@ -1,0 +1,71 @@
+---
+title: "Module 8"
+author: "Chris Reddish"
+date: "2025-03-03"
+output: html_document
+---
+In this assignment, I worked with the "Assignment 6 Dataset.txt" file to perform data operations in R using the plyr package. The goal was to:
+
+Import the dataset.
+Calculate the mean of grades grouped by Sex.
+Filter names containing the letter "i".
+Write the outputs to files.
+
+## 🔹 Step 1: Import Dataset & Calculate Mean of Grades by Sex
+First, I imported the dataset into R using the read.table() function. Then, I used the ddply() function from the plyr package to calculate the average grade for each gender (Male and Female). Here's the code I used:
+```{r}
+# Load the plyr package
+library(plyr)
+
+# Import dataset
+Student_assignment_6 <- read.table("Assignment 6 Dataset.txt", header = TRUE, sep = ",")
+
+# View the full dataset
+View(Student_assignment_6)
+print(Student_assignment_6)
+
+# Calculate mean grade by Sex
+StudentAverage <- ddply(Student_assignment_6, "Sex", transform, Grade.Average = mean(Grade))
+
+# View the dataset with the Grade.Average column
+View(StudentAverage)
+print(StudentAverage)
+
+# Write results to CSV
+write.table(StudentAverage, "Students_Gendered_Mean.csv", sep = ",", row.names = FALSE)
+
+```
+The "Students_Gendered_Mean.csv" file was created, containing the full dataset with an additional column called Grade.Average, which shows the average grade of each gender.
+
+## Step 2: Filter Names Containing the Letter "i"
+Next, I filtered the dataset to create a new subset containing only the student names with the letter "i" (case-insensitive). This was done using the subset() function along with grepl() to match the letter "i" or "I" in the "Name" column.
+```{r}
+# Filter names with the letter "i"
+i_students <- subset(Student_assignment_6, grepl("[iI]", Student_assignment_6$Name))
+
+# View the filtered dataset
+View(i_students)
+print(i_students)
+```
+## Step 3: Write Filtered Names to a CSV
+Finally, I wrote the filtered names dataset to a CSV file called "Students_With_I.csv" using the write.table() function.
+```{r}
+# Write filtered names to CSV
+write.table(i_students, "Students_With_I.csv", sep = ",", row.names = FALSE)
+
+```
+The "Students_With_I.csv" file was created, containing only the students whose names have the letter "i" in them.
+
+# Reflection:
+This assignment helped me practice:
+
+Importing datasets.
+Grouping data and calculating summary statistics using the plyr package.
+Filtering data based on string matching.
+Exporting results to CSV files.
+By following these steps, I successfully produced two output files as required and reinforced my understanding of R's data manipulation functions.
+
+# Files Created:
+Students_Gendered_Mean.csv
+Students_With_I.csv
+
