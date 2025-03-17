@@ -1,0 +1,167 @@
+---
+title: "Module 9: Comparing Visualization Methods in R"
+author: "Chris Reddish"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## **Introduction**
+This report compares **three visualization techniques** in R: **Base R, Lattice, and ggplot2**. We analyze the `USArrests` dataset, which contains crime statistics for the 50 U.S. states. The dataset includes four key variables:
+- **Murder:** The number of murders per 100,000 residents
+- **Assault:** The number of assaults per 100,000 residents
+- **Rape:** The number of rapes per 100,000 residents
+- **UrbanPop:** The percentage of the population living in urban areas
+
+We will explore how these variables relate and visualize key trends using different R visualization approaches.
+
+```{r load-packages}
+# Load necessary libraries
+library(lattice)
+library(ggplot2)
+library(reshape2)
+library(ggcorrplot) # For correlation heatmap
+```
+
+```{r load-data}
+# Load dataset
+USArrests <- read.csv("USArrests.csv", row.names = 1)
+USArrests$State <- rownames(USArrests)
+USArrests_long <- melt(USArrests, id.vars = "State", variable.name = "CrimeType", value.name = "Rate")
+```
+
+# **1️⃣ Comparison Across Visualization Methods**
+
+## **Histogram of Murder Rates**
+Understanding the distribution of **murder rates across states** helps identify which states have **higher crime levels** and if the data follows a normal distribution or is skewed.
+
+### **Base R**
+```{r base-hist}
+hist(USArrests$Murder, 
+     breaks = 10, col = "lightblue", border = "black",
+     main = "Histogram of Murder Rates (Base R)",
+     xlab = "Murder Rate (per 100,000 people)",
+     ylab = "Number of States")
+
+abline(v = mean(USArrests$Murder), col = "red", lwd = 2, lty = 2)
+```
+
+### **Lattice**
+```{r lattice-hist}
+histogram(~Murder, data = USArrests,
+          main = "Histogram of Murder Rates (Lattice)",
+          xlab = "Murder Rate",
+          col = "blue")
+```
+
+### **ggplot2**
+```{r ggplot-hist}
+ggplot(USArrests, aes(x = Murder)) +
+  geom_histogram(binwidth = 1, fill = "lightblue", color = "black") +
+  geom_vline(aes(xintercept = mean(Murder)), color = "red", linetype = "dashed") +
+  labs(title = "Histogram of Murder Rates (ggplot2)",
+       x = "Murder Rate (per 100,000 people)",
+       y = "Number of States") +
+  theme_minimal()
+```
+
+**What we learn from these histograms:**
+- The **majority of states** have lower murder rates, with a few having very high rates (right-skewed distribution).
+- The red line (mean) shows that most states fall **below the national average**.
+- ggplot2 provides a **more refined visualization**, while base R and lattice are effective but less visually polished.
+
+## **Ordered Bar Chart: Murder Rate by State**
+To compare crime levels across states, we rank them from lowest to highest murder rate.
+
+```{r ggplot-bar}
+ggplot(USArrests, aes(x = reorder(State, Murder), y = Murder, fill = Murder)) +
+  geom_bar(stat = "identity") +
+  coord_flip() +
+  scale_fill_gradient(low = "lightblue", high = "red") +
+  labs(title = "Which States Have the Highest Murder Rates?",
+       x = "State",
+       y = "Murder Rate per 100,000 people") +
+  theme_minimal()
+```
+
+**Key insights from this bar chart:**
+- States with the highest murder rates are clearly highlighted.
+- The **color gradient** makes it easier to see crime intensity differences.
+- **Flipping the bars** ensures better readability.
+
+## **Scatter Plot: Murder vs. Assault**
+This visualization examines whether **higher assault rates correlate with higher murder rates**. 
+
+### **Base R**
+```{r base-scatter}
+plot(USArrests$Assault, USArrests$Murder, 
+     main = "Murder vs Assault (Base R)", 
+     xlab = "Assault Rate",
+     ylab = "Murder Rate",
+     col = "blue", pch = 16)
+
+abline(lm(Murder ~ Assault, data = USArrests), col = "red", lwd = 2)
+```
+
+### **Lattice**
+```{r lattice-scatter}
+xyplot(Murder ~ Assault, data = USArrests,
+       main = "Murder vs Assault (Lattice)",
+       xlab = "Assault Rate",
+       ylab = "Murder Rate",
+       panel = function(x, y, ...) {
+           panel.xyplot(x, y, ...)
+           panel.abline(lm(y ~ x), col = "red", lwd = 2)
+       })
+```
+
+### **ggplot2**
+```{r ggplot-scatter}
+ggplot(USArrests, aes(x = Assault, y = Murder, color = UrbanPop)) +
+  geom_point(size = 3, alpha = 0.7) +
+  geom_smooth(method = "lm", color = "red") +
+  scale_color_gradient(low = "blue", high = "red") +
+  labs(title = "Does a Higher Assault Rate Mean More Murders?",
+       x = "Assault Rate per 100,000",
+       y = "Murder Rate per 100,000",
+       color = "Urban Population") +
+  theme_minimal()
+```
+
+**Key insights from scatter plots:**
+- There is a **strong positive correlation** between **assault and murder rates**.
+- More urbanized states (**higher UrbanPop values**) tend to have **higher crime rates**.
+- The **ggplot2 version is visually superior**, showing clear trends and including a color gradient for extra insight.
+
+## **Correlation Heatmap of Crime Variables**
+```{r crime-correlation}
+# Compute correlation matrix ensuring all values are included
+crime_corr <- cor(USArrests[, c("Murder", "Assault", "Rape", "UrbanPop")], use = "everything", method = "pearson")
+
+# Print correlation matrix to check if values are being computed
+print(crime_corr)
+
+# Create a correlation heatmap with proper spacing
+ggcorrplot(crime_corr, method = "circle", type = "full", lab = TRUE, 
+           title = "Correlation Between Crime Variables",
+           outline.col = "white", colors = c("blue", "white", "red"))
+
+```
+
+**Key Takeaways:**
+- **Murder and Assault are highly correlated**, meaning **states with more assaults also have more murders**.
+- **Urban population has weaker correlations**, suggesting **crime isn’t just an urban problem**.
+- The **heatmap provides a great summary of relationships between variables**.
+
+# **Conclusion**
+These **9 visualizations** demonstrate the strengths of **Base R, Lattice, and ggplot2**:
+- **Base R** is simple but lacks customization.
+- **Lattice** is useful for multi-panel comparisons but less flexible.
+- **ggplot2** is the best for **high-quality, detailed visualizations**.
+
+Overall, **ggplot2 offers the clearest insights** into crime trends and relationships, making it the best choice for data-driven decision-making.
+
+
