@@ -153,5 +153,5 @@ A breakdown of each function used in the app, including what it does, what it ta
 
 ## 🔗 GitHub Link
 
-[Paste your GitHub repo link here once uploaded]
+https://github.com/Cred1747/RStudio/blob/main/BourbonMarkdown.Rmd
 
