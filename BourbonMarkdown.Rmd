@@ -1,0 +1,157 @@
+---
+title: "Bourbon Shiny App – Function Documentation"
+author: "Chris Reddish"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+## 🔍 Overview
+
+This R Markdown file documents the main functions developed for my final Shiny app project: **Bourbon Explorer**. The app allows users to explore a dataset of bourbons using interactive filters for Price, Rating, and ABV. The user can also compare multiple bourbons and see a ranked list based on a calculated score.
+
+The dataset used is `BourbonFINAL.csv`, and the app uses `ggplot2`, `dplyr`, `tidyr`, and `shiny`.
+
+---
+
+## 🧠 Function 1: `filtered_data()`
+
+**Purpose:**  
+Filters the bourbon dataset using user-selected inputs for price, rating, and ABV. Also creates a calculated `Score` used for sorting.
+
+**Inputs:**
+- `input$price_range`: minimum and maximum price
+- `input$rating_range`: rating slider
+- `input$abv_range`: alcohol by volume range
+
+**Output:**  
+A filtered and scored dataset sorted by descending `Score`.
+
+```{r eval=FALSE}
+filtered_data <- reactive({
+  bourbon_data %>%
+    filter(
+      Price >= input$price_range[1],
+      Price <= input$price_range[2],
+      Rating >= input$rating_range[1],
+      Rating <= input$rating_range[2],
+      Abv >= input$abv_range[1],
+      Abv <= input$abv_range[2]
+    ) %>%
+    mutate(
+      Proof = Abv * 2,
+      Score = (Rating * 0.6) + (Proof * 0.2) - (Price * 0.2)
+    ) %>%
+    arrange(desc(Score))
+})
+```
+
+---
+
+## 📊 Function 2: `output$topPlot`
+
+**Purpose:**  
+Displays a horizontal bar chart showing the top N bourbons ranked by the custom `Score` metric calculated in `filtered_data()`.
+
+**Inputs:**
+- `input$top_n`: Number of bourbons to display in the plot  
+- `filtered_data()`: The reactive dataset filtered and sorted by Score
+
+**Output:**  
+A `ggplot2` bar chart rendered using `renderPlot()`.
+
+```{r eval=FALSE}
+output$topPlot <- renderPlot({
+  filtered_data() %>%
+    slice_head(n = input$top_n) %>%
+    ggplot(aes(x = reorder(Name, Score), y = Score)) +
+    geom_col(fill = "darkred") +
+    coord_flip() +
+    labs(
+      title = paste("Top", input$top_n, "Bourbons by Score"),
+      x = "Bourbon", y = "Score"
+    ) +
+    theme_minimal()
+})
+```
+
+---
+
+## 📈 Function 3: `output$comparePlot`
+
+**Purpose:**  
+Creates a grouped bar chart comparing the selected bourbons across three attributes: Price, ABV, and Rating.
+
+**Inputs:**
+- `input$compare`: A character vector of selected bourbon names
+
+**Output:**  
+A grouped bar chart showing attribute values side-by-side for each bourbon.
+
+```{r eval=FALSE}
+output$comparePlot <- renderPlot({
+  selected <- input$compare
+  compare_df <- bourbon_data %>%
+    filter(Name %in% selected) %>%
+    select(Name, Price, Abv, Rating) %>%
+    pivot_longer(cols = -Name)
+
+  ggplot(compare_df, aes(x = name, y = value, fill = Name)) +
+    geom_col(position = "dodge") +
+    labs(
+      title = "Comparison of Selected Bourbons",
+      x = "Attribute", y = "Value"
+    ) +
+    theme_minimal()
+})
+```
+
+---
+
+## 📋 Function 4: `output$filteredTable`
+
+**Purpose:**  
+Displays the filtered data table so users can see exactly which bourbons match their criteria.
+
+**Inputs:**
+- No direct input (uses `filtered_data()`)
+
+**Output:**  
+A table rendered using `renderTable()`.
+
+```{r eval=FALSE}
+output$filteredTable <- renderTable({
+  filtered_data()
+})
+```
+
+---
+
+## 💡 Insights and Challenges
+
+### What I Learned
+- How to use `reactive()` functions in Shiny
+- How to link user inputs to dynamic filtering and plot rendering
+- How to use `mutate()` to calculate a composite score
+- How to handle user interface components like sliders and dropdowns
+
+### Challenges Faced
+- Designing a good filter experience while still supporting premium bourbons ($250+)
+- Getting slider ranges to adapt dynamically to the dataset
+- Debugging logic when no data met filter conditions
+
+---
+
+## 📝 Blog Summary
+
+**What R Markdown Helps Me Accomplish:**  
+This document helped me communicate exactly how my Bourbon Explorer app works. It combines written explanations with code examples in one place, making it easy to share, review, and improve.
+
+**What I Created in This File:**  
+A breakdown of each function used in the app, including what it does, what it takes in, what it returns, and how it's used in the UI.
+
+---
+
+## 🔗 GitHub Link
+
+[Paste your GitHub repo link here once uploaded]
+
